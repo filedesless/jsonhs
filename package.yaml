@@ -62,3 +62,5 @@ tests:
     - hspec-contrib
     - QuickCheck
     - HUnit
+    - aeson
+    - bytestring
