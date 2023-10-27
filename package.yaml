@@ -64,3 +64,17 @@ tests:
     - HUnit
     - aeson
     - bytestring
+
+benchmarks:
+  jsonhs-benchmark:
+    main: Main.hs
+    source-dirs: bench
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - jsonhs
+    - criterion
+    - aeson
+    - bytestring

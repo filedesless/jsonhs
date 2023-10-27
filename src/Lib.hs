@@ -4,7 +4,7 @@
 module Lib where
 
 import Data.Char
-import Data.List
+import Data.List (intercalate, singleton)
 import Text.Parsec
 import Text.Parsec.String
 import Text.Printf
@@ -12,8 +12,8 @@ import Text.Printf
 data JsonValue
   = JsonString String
   | JsonNumber Double
-  | JsonObject [(String, JsonValue)]
-  | JsonArray [JsonValue]
+  | JsonObject [(String, JsonValue)] -- TODO: Map
+  | JsonArray [JsonValue] -- TODO: Vector
   | JsonTrue
   | JsonFalse
   | JsonNull
@@ -52,10 +52,10 @@ jsonValue = do
   spaces
   val <-
     choice
-      [ JsonString <$> jsonString
-      , JsonNumber <$> jsonNumber
+      [ JsonArray <$> jsonArray
       , JsonObject <$> jsonObject
-      , JsonArray <$> jsonArray
+      , JsonString <$> jsonString
+      , JsonNumber <$> jsonNumber
       , JsonTrue <$ string "true"
       , JsonFalse <$ string "false"
       , JsonNull <$ string "null"

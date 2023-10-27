@@ -74,3 +74,22 @@ test-suite jsonhs-test
     , jsonhs
     , parsec
   default-language: Haskell2010
+
+benchmark jsonhs-benchmark
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Paths_jsonhs
+  autogen-modules:
+      Paths_jsonhs
+  hs-source-dirs:
+      bench
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , criterion
+    , jsonhs
+    , parsec
+  default-language: Haskell2010
