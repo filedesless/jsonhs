@@ -1,3 +1,90 @@
+# Improving Serializing using ShowS
+
+This allows constant time string concatenation using function composition
+
+```
+Benchmark jsonhs-benchmark: RUNNING...
+benchmarking nested arrays/deserialize
+time                 8.460 ms   (8.279 ms .. 8.589 ms)
+                     0.989 R²   (0.965 R² .. 0.999 R²)
+mean                 8.459 ms   (8.329 ms .. 8.944 ms)
+std dev              640.1 μs   (139.2 μs .. 1.303 ms)
+variance introduced by outliers: 41% (moderately inflated)
+                    
+benchmarking nested arrays/aeson decode
+time                 4.594 ms   (4.419 ms .. 4.813 ms)
+                     0.992 R²   (0.986 R² .. 0.997 R²)
+mean                 4.292 ms   (4.234 ms .. 4.395 ms)
+std dev              230.4 μs   (170.1 μs .. 328.4 μs)
+variance introduced by outliers: 31% (moderately inflated)
+                    
+benchmarking nested arrays/json decode
+time                 1.629 ms   (1.595 ms .. 1.673 ms)
+                     0.994 R²   (0.989 R² .. 0.998 R²)
+mean                 1.606 ms   (1.580 ms .. 1.633 ms)
+std dev              93.86 μs   (75.36 μs .. 117.9 μs)
+variance introduced by outliers: 44% (moderately inflated)
+                    
+benchmarking nested arrays/serialize
+time                 635.3 μs   (629.2 μs .. 642.3 μs)
+                     0.996 R²   (0.986 R² .. 1.000 R²)
+mean                 647.5 μs   (635.8 μs .. 690.2 μs)
+std dev              73.95 μs   (12.00 μs .. 155.8 μs)
+variance introduced by outliers: 80% (severely inflated)
+                    
+benchmarking nested arrays/aeson encode
+time                 529.8 μs   (527.9 μs .. 532.7 μs)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 530.9 μs   (529.1 μs .. 533.6 μs)
+std dev              8.023 μs   (5.168 μs .. 10.94 μs)
+                    
+benchmarking nested arrays/json encode
+time                 214.8 μs   (210.2 μs .. 221.6 μs)
+                     0.994 R²   (0.989 R² .. 0.999 R²)
+mean                 211.9 μs   (209.7 μs .. 219.6 μs)
+std dev              12.21 μs   (8.402 μs .. 21.27 μs)
+variance introduced by outliers: 56% (severely inflated)
+                    
+benchmarking long strings/deserialize
+time                 9.484 ms   (9.395 ms .. 9.614 ms)
+                     0.999 R²   (0.999 R² .. 1.000 R²)
+mean                 9.319 ms   (9.246 ms .. 9.375 ms)
+std dev              167.5 μs   (125.3 μs .. 213.0 μs)
+                    
+benchmarking long strings/aeson decode
+time                 1.705 ms   (1.696 ms .. 1.719 ms)
+                     0.999 R²   (0.999 R² .. 1.000 R²)
+mean                 1.706 ms   (1.698 ms .. 1.720 ms)
+std dev              37.42 μs   (25.14 μs .. 56.72 μs)
+                    
+benchmarking long strings/json decode
+time                 543.3 ns   (542.1 ns .. 544.4 ns)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 542.7 ns   (541.7 ns .. 544.1 ns)
+std dev              4.188 ns   (2.518 ns .. 6.721 ns)
+                    
+benchmarking long strings/serialize
+time                 1.943 ms   (1.937 ms .. 1.952 ms)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 1.941 ms   (1.939 ms .. 1.946 ms)
+std dev              12.03 μs   (7.685 μs .. 19.01 μs)
+                    
+benchmarking long strings/aeson encode
+time                 106.0 μs   (105.7 μs .. 106.3 μs)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 106.3 μs   (106.0 μs .. 106.7 μs)
+std dev              1.239 μs   (876.1 ns .. 1.621 μs)
+                    
+benchmarking long strings/json encode
+time                 218.3 ns   (217.8 ns .. 218.8 ns)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 217.5 ns   (217.3 ns .. 218.0 ns)
+std dev              1.035 ns   (808.0 ps .. 1.298 ns)
+                    
+Benchmark jsonhs-benchmark: FINISH
+```
+
+
 # Splitting Serializing and Deserializing benchmarks
 
 Turns out serializing was the bottleneck, thanks profiler!
@@ -42,42 +129,6 @@ time                 673.5 μs   (672.1 μs .. 675.9 μs)
                      1.000 R²   (1.000 R² .. 1.000 R²)
 mean                 672.2 μs   (671.0 μs .. 675.0 μs)
 std dev              6.058 μs   (3.881 μs .. 8.965 μs)
-                    
-benchmarking nested objects/deserialize
-time                 1.051 μs   (1.049 μs .. 1.052 μs)
-                     1.000 R²   (1.000 R² .. 1.000 R²)
-mean                 1.053 μs   (1.051 μs .. 1.055 μs)
-std dev              5.564 ns   (4.050 ns .. 7.684 ns)
-                    
-benchmarking nested objects/aeson decode
-time                 1.636 μs   (1.633 μs .. 1.639 μs)
-                     1.000 R²   (1.000 R² .. 1.000 R²)
-mean                 1.636 μs   (1.634 μs .. 1.638 μs)
-std dev              6.321 ns   (5.137 ns .. 8.325 ns)
-                    
-benchmarking nested objects/json decode
-time                 1.548 μs   (1.545 μs .. 1.552 μs)
-                     1.000 R²   (1.000 R² .. 1.000 R²)
-mean                 1.548 μs   (1.546 μs .. 1.553 μs)
-std dev              11.16 ns   (6.924 ns .. 18.07 ns)
-                    
-benchmarking nested objects/serialize
-time                 19.13 ns   (19.08 ns .. 19.17 ns)
-                     1.000 R²   (1.000 R² .. 1.000 R²)
-mean                 19.11 ns   (19.08 ns .. 19.13 ns)
-std dev              91.03 ps   (75.19 ps .. 113.3 ps)
-                    
-benchmarking nested objects/aeson encode
-time                 17.54 ns   (17.51 ns .. 17.58 ns)
-                     1.000 R²   (1.000 R² .. 1.000 R²)
-mean                 17.56 ns   (17.53 ns .. 17.63 ns)
-std dev              171.2 ps   (124.9 ps .. 242.9 ps)
-                    
-benchmarking nested objects/json encode
-time                 197.2 ns   (197.0 ns .. 197.4 ns)
-                     1.000 R²   (1.000 R² .. 1.000 R²)
-mean                 197.6 ns   (197.2 ns .. 198.2 ns)
-std dev              1.674 ns   (1.140 ns .. 2.276 ns)
                     
 benchmarking long strings/deserialize
 time                 14.91 ms   (14.79 ms .. 15.00 ms)
@@ -132,13 +183,6 @@ time                 16.22 ms   (15.81 ms .. 16.56 ms)
 mean                 15.90 ms   (15.83 ms .. 16.04 ms)
 std dev              255.3 μs   (170.8 μs .. 384.6 μs)
                     
-benchmarking deserialize/1000 objects
-time                 384.9 ns   (383.9 ns .. 386.2 ns)
-                     1.000 R²   (1.000 R² .. 1.000 R²)
-mean                 385.6 ns   (384.6 ns .. 387.6 ns)
-std dev              4.796 ns   (2.758 ns .. 7.095 ns)
-variance introduced by outliers: 11% (moderately inflated)
-                    
 benchmarking deserialize/long string
 time                 10.59 ms   (10.41 ms .. 10.98 ms)
                      0.993 R²   (0.980 R² .. 1.000 R²)
@@ -151,13 +195,6 @@ time                 144.6 μs   (144.2 μs .. 144.9 μs)
                      1.000 R²   (1.000 R² .. 1.000 R²)
 mean                 144.5 μs   (144.4 μs .. 144.8 μs)
 std dev              606.8 ns   (386.8 ns .. 1.010 μs)
-                    
-benchmarking aeson decode/1000 objects
-time                 295.8 ns   (293.5 ns .. 299.1 ns)
-                     0.997 R²   (0.994 R² .. 1.000 R²)
-mean                 300.5 ns   (295.2 ns .. 317.1 ns)
-std dev              28.72 ns   (13.88 ns .. 53.26 ns)
-variance introduced by outliers: 89% (severely inflated)
                     
 benchmarking aeson decode/long string
 time                 516.1 μs   (515.2 μs .. 517.4 μs)

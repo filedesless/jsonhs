@@ -10,13 +10,16 @@ import Test.Hspec
 import Test.QuickCheck
 import Text.Parsec
 
+randomString :: Gen String
+randomString = listOf (arbitraryASCIIChar `suchThat` (not . isControl))
+
 instance Arbitrary JsonValue where
   arbitrary =
     oneof
-      [ JsonString <$> listOf (arbitraryASCIIChar `suchThat` (not . isControl)),
+      [ JsonString <$> randomString,
         JsonNumber <$> arbitrary,
         JsonArray <$> scale (`div` 2) arbitrary,
-        JsonObject <$> scale (`div` 2) arbitrary,
+        JsonObject <$> scale (`div` 2) (listOf (liftArbitrary2 randomString arbitrary)),
         elements [JsonTrue, JsonFalse, JsonNull]
       ]
   shrink (JsonArray l) = JsonNull : l
@@ -34,6 +37,7 @@ main = do
         parse (jsonNumber <* eof) "" "-0" `shouldBe` Right 0
         parse (jsonNumber <* eof) "" "-1" `shouldBe` Right (-1)
         parse (jsonNumber <* eof) "" "1.0" `shouldBe` Right 1
+
     describe "Lib.jsonString" $ do
       it "parses test strings correctly" $ do
         parse (jsonString <* eof) "" (show "") `shouldBe` Right ""

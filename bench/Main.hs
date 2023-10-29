@@ -5,9 +5,6 @@ import qualified Data.ByteString.Lazy.Char8 as B
 import Lib
 import qualified Text.JSON as J
 
-objects :: String
-objects = replicate 10000 '{' ++ replicate 10000 '}'
-
 arrays :: String
 arrays = replicate 10000 '[' ++ replicate 10000 ']'
 
@@ -27,15 +24,6 @@ main =
         , bench "json encode" $ nf (J.resultToEither . (J.encodeStrict <$>)) (json_decode arrays)
         ]
     , bgroup
-        "nested objects"
-        [ bench "deserialize" $ nf (bimap (const "") show . deserialize) objects
-        , bench "aeson decode" $ nf (show . aeson_decode . B.pack) objects
-        , bench "json decode" $ nf (show . json_decode) objects
-        , bench "serialize" $ nf (bimap (const "") serialize) (deserialize objects)
-        , bench "aeson encode" $ nf (A.encode <$>) (aeson_decode (B.pack objects))
-        , bench "json encode" $ nf (J.resultToEither . (J.encodeStrict <$>)) (json_decode objects)
-        ]
-    , bgroup
         "long strings"
         [ bench "deserialize" $ nf (bimap (const "") show . deserialize) longString
         , bench "aeson decode" $ nf (show . aeson_decode . B.pack) longString
@@ -45,6 +33,6 @@ main =
         , bench "json encode" $ nf (J.resultToEither . (J.encodeStrict <$>)) (json_decode longString)
         ]
     ]
-    where
-      aeson_decode = A.decode :: B.ByteString -> Maybe A.Value
-      json_decode = J.decodeStrict :: String -> J.Result J.JSValue
+  where
+    aeson_decode = A.decode :: B.ByteString -> Maybe A.Value
+    json_decode = J.decodeStrict :: String -> J.Result J.JSValue

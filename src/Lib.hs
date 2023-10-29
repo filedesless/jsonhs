@@ -4,7 +4,7 @@
 module Lib where
 
 import Data.Char
-import Data.List (intercalate, singleton)
+import Data.List (singleton, intersperse)
 import Text.Parsec
 import Text.Parsec.String
 import Text.Printf
@@ -105,13 +105,15 @@ jsonArray = between (char '[') (char ']') (sepBy jsonValue (char ','))
 deserialize :: String -> Either ParseError JsonValue
 deserialize = parse ((JsonString "" <$ eof) <|> jsonValue <* eof) ""
 
+showJsonValue :: JsonValue -> ShowS
+showJsonValue (JsonArray l) = showChar '[' . foldr (.) id (intersperse (showString ", ") (showJsonValue <$> l)) . showChar ']'
+showJsonValue (JsonObject l) = showChar '{' . foldr (.) id (intersperse (showString ", ") (showJsonObject <$> l)) . showChar '}'
+  where showJsonObject (k, v) = showJsonValue (JsonString k) . showString ": " . showJsonValue v
+showJsonValue (JsonNumber n) = showString (show n)
+showJsonValue (JsonString s) = showChar '\"' . showString (s >>= jsonUnEscape) . showChar '\"'
+showJsonValue JsonTrue = showString "true"
+showJsonValue JsonFalse = showString "false"
+showJsonValue JsonNull = showString "null"
+
 serialize :: JsonValue -> String
-serialize (JsonString s) = concat ["\"", s >>= jsonUnEscape, "\""]
-serialize (JsonNumber n) = show n
-serialize (JsonArray l) = concat ["[", intercalate ", " (map serialize l), "]"]
-serialize JsonTrue = "true"
-serialize JsonFalse = "false"
-serialize JsonNull = "null"
-serialize (JsonObject l) = concat ["{", intercalate ", " objects, "}"]
- where
-  objects = [serialize (JsonString s) ++ ": " ++ serialize v | (s, v) <- l]
+serialize v = showJsonValue v []
